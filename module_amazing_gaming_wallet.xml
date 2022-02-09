@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_amazing_gaming_wallet" default="compile.module.amazing_gaming_wallet">
+  <dirname property="module.amazing_gaming_wallet.basedir" file="${ant.file.module_amazing_gaming_wallet}"/>
+  
+  <property name="module.jdk.home.amazing_gaming_wallet" value="${jdk.home.1.8}"/>
+  <property name="module.jdk.bin.amazing_gaming_wallet" value="${jdk.bin.1.8}"/>
+  <property name="module.jdk.classpath.amazing_gaming_wallet" value="jdk.classpath.1.8"/>
+  
+  <property name="compiler.args.amazing_gaming_wallet" value="-encoding UTF-8 -source 8 -target 8 ${compiler.args}"/>
+  
+  <property name="amazing_gaming_wallet.output.dir" value="${module.amazing_gaming_wallet.basedir}/out/production/amazing_gaming_wallet"/>
+  <property name="amazing_gaming_wallet.testoutput.dir" value="${module.amazing_gaming_wallet.basedir}/out/test/amazing_gaming_wallet"/>
+  
+  <path id="amazing_gaming_wallet.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="amazing_gaming_wallet.module.production.classpath">
+    <path refid="${module.jdk.classpath.amazing_gaming_wallet}"/>
+  </path>
+  
+  <path id="amazing_gaming_wallet.runtime.production.module.classpath">
+    <pathelement location="${amazing_gaming_wallet.output.dir}"/>
+  </path>
+  
+  <path id="amazing_gaming_wallet.module.classpath">
+    <path refid="${module.jdk.classpath.amazing_gaming_wallet}"/>
+    <pathelement location="${amazing_gaming_wallet.output.dir}"/>
+  </path>
+  
+  <path id="amazing_gaming_wallet.runtime.module.classpath">
+    <pathelement location="${amazing_gaming_wallet.testoutput.dir}"/>
+    <pathelement location="${amazing_gaming_wallet.output.dir}"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.amazing_gaming_wallet">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.amazing_gaming_wallet">
+    <patternset refid="excluded.from.module.amazing_gaming_wallet"/>
+  </patternset>
+  
+  
+  <target name="compile.module.amazing_gaming_wallet" depends="compile.module.amazing_gaming_wallet.production,compile.module.amazing_gaming_wallet.tests" description="Compile module amazing_gaming_wallet"/>
+  
+  <target name="compile.module.amazing_gaming_wallet.production" depends="register.custom.compilers" description="Compile module amazing_gaming_wallet; production classes"/>
+  
+  <target name="compile.module.amazing_gaming_wallet.tests" depends="register.custom.compilers,compile.module.amazing_gaming_wallet.production" description="compile module amazing_gaming_wallet; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.amazing_gaming_wallet" description="cleanup module">
+    <delete dir="${amazing_gaming_wallet.output.dir}"/>
+    <delete dir="${amazing_gaming_wallet.testoutput.dir}"/>
+  </target>
+</project>
