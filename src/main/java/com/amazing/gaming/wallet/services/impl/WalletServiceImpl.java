@@ -16,6 +16,9 @@ import com.amazing.gaming.wallet.services.WalletService;
 import lombok.RequiredArgsConstructor;
 
 
+/**
+ * Implementation of {@WalletService}
+ */
 @Service
 @RequiredArgsConstructor
 public class WalletServiceImpl implements WalletService
@@ -44,19 +47,22 @@ public class WalletServiceImpl implements WalletService
 	@Transactional(rollbackFor = Exception.class)
 	public Wallet updateByDeposit(final Transaction transaction)
 	{
+		//get the balance of the player
 		Wallet wallet = getBalance(transaction.getPlayer().getId());
 
+		//if wallet is null then create a new entity
 		if (Objects.isNull(wallet))
 		{
 			wallet = new Wallet();
 			wallet.setCashBalance(transaction.getAmount());
 		}
 		else
-		{
+		{ //else update the cash balance (last cash balance + new value)
 			wallet.setCashBalance((Objects.nonNull(wallet.getCashBalance()) ? wallet.getCashBalance() :
 					NumberUtils.DOUBLE_ZERO) + transaction.getAmount());
 		}
 
+		//if the amount is greater than or equal to 100 then update the bonus balance (last bonus balance + amount)
 		if (transaction.getAmount() >= BONUS_VALUE)
 		{
 			wallet.setBonusBalance((Objects.nonNull(wallet.getBonusBalance()) ? wallet.getBonusBalance() :

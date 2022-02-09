@@ -22,6 +22,9 @@ import com.amazing.gaming.wallet.services.WalletService;
 import lombok.RequiredArgsConstructor;
 
 
+/**
+ * Implementation of {@TransactionService}
+ */
 @Service
 @RequiredArgsConstructor
 public class TransactionServiceImpl implements TransactionService
@@ -46,19 +49,23 @@ public class TransactionServiceImpl implements TransactionService
 	@Transactional(rollbackFor = Exception.class)
 	public Wallet withdraw(final Transaction transaction) throws TransactionException
 	{
+		//get the balance of the player
 		Wallet wallet = walletService.getBalance(transaction.getPlayer().getId());
 
+		//If the wallet is not null and cash balance is greater than or equal to amount
+		//Then the transaction is possible
 		if (Objects.nonNull(wallet) && Objects.nonNull(wallet.getCashBalance()) && wallet.getCashBalance() >= transaction
 				.getAmount())
 		{
 			transaction.setType(TransactionType.WITHDRAW.getId());
 			transactionRepository.save(transaction);
 
+			//And the cash balance is subtracted the value to be withdrawn
 			wallet.setCashBalance(wallet.getCashBalance() - transaction.getAmount());
 			return walletService.save(wallet);
 		}
 		else
-		{
+		{ //Else error message is returned
 			throw new TransactionException(WITHDRAW_ERROR);
 		}
 	}
@@ -67,39 +74,35 @@ public class TransactionServiceImpl implements TransactionService
 	@Transactional(rollbackFor = Exception.class)
 	public Wallet registerBet(final Transaction transaction) throws TransactionException
 	{
+		//get the balance of the player
 		Wallet wallet = walletService.getBalance(transaction.getPlayer().getId());
-		if (Objects.nonNull(wallet))
+
+		//If the wallet is not null and and the money available is greater than or equal to bet
+		// then the bet is possible
+		if (Objects.nonNull(wallet) && wallet.getBonusBalance() + wallet.getCashBalance() >= transaction.getAmount())
 		{
-			Double moneyTotal = wallet.getBonusBalance() + wallet.getCashBalance();
+			transaction.setType(TransactionType.BET.getId());
 
-			if (moneyTotal >= transaction.getAmount())
+			Double transactionValue = transaction.getAmount() - wallet.getCashBalance();
+
+			//if the cash balance is not enough
+			if (transactionValue > NumberUtils.DOUBLE_ZERO)
 			{
-				transaction.setType(TransactionType.BET.getId());
-
-				Double transactionValue = transaction.getAmount() - wallet.getCashBalance();
-
-				if (transactionValue > NumberUtils.DOUBLE_ZERO)
-				{
-					transaction.setProportionalBet(wallet.getCashBalance() / transaction.getAmount());
-
-					wallet.setCashBalance(NumberUtils.DOUBLE_ZERO);
-					wallet.setBonusBalance(wallet.getBonusBalance() - transactionValue);
-				}
-				else
-				{
-					transaction.setProportionalBet(NumberUtils.DOUBLE_ONE);
-					wallet.setCashBalance(wallet.getCashBalance() - transaction.getAmount());
-				}
-				transactionRepository.save(transaction);
-				return walletService.save(wallet);
+				//the proportional percentage of cash is calculated
+				transaction.setProportionalBet(wallet.getCashBalance() / transaction.getAmount());
+				wallet.setCashBalance(NumberUtils.DOUBLE_ZERO);
+				wallet.setBonusBalance(wallet.getBonusBalance() - transactionValue);
 			}
 			else
 			{
-				throw new TransactionException(BET_ERROR);
+				transaction.setProportionalBet(NumberUtils.DOUBLE_ONE);
+				wallet.setCashBalance(wallet.getCashBalance() - transaction.getAmount());
 			}
+			transactionRepository.save(transaction);
+			return walletService.save(wallet);
 		}
 		else
-		{
+		{ // Else error message is returned
 			throw new TransactionException(BET_ERROR);
 		}
 	}
@@ -108,8 +111,10 @@ public class TransactionServiceImpl implements TransactionService
 	@Transactional(rollbackFor = Exception.class)
 	public Wallet registerWin(final Transaction transaction) throws TransactionException
 	{
+		//get the balance of the player
 		Wallet wallet = walletService.getBalance(transaction.getPlayer().getId());
 
+		//get last bet transaction, because we need know the proportional value
 		Transaction lastBetTransaction = transactionRepository.getFirstByTypeOrderByIdAsc(TransactionType.BET.getId());
 
 		if (Objects.nonNull(lastBetTransaction) && Objects.nonNull(wallet))
@@ -124,7 +129,7 @@ public class TransactionServiceImpl implements TransactionService
 			return walletService.save(wallet);
 		}
 		else
-		{
+		{ // Else error message is returned
 			throw new TransactionException(WIN_ERROR);
 		}
 	}

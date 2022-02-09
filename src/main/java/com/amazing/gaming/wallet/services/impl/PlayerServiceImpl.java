@@ -12,6 +12,9 @@ import com.amazing.gaming.wallet.services.PlayerService;
 import lombok.RequiredArgsConstructor;
 
 
+/**
+ * Implementation of {@link PlayerService}
+ */
 @Service
 @RequiredArgsConstructor
 public class PlayerServiceImpl implements PlayerService
